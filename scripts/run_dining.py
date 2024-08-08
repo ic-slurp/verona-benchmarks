@@ -20,7 +20,7 @@ def getopts():
 
 def run_test(args, num, csv, file):
     start = time.time()
-    subprocess.run(args, check=True)
+    subprocess.run(args, check=True, stdout=subprocess.DEVNULL)
     end = time.time()
     csv.writerow((num, end - start))
     file.flush()
@@ -38,8 +38,8 @@ if __name__ == '__main__':
     if not os.path.exists(output_directory):
         os.mkdir(output_directory)
 
+    print("Running dining philosophers")
     if not args.fast:
-        print("Running dining philosophers")
         print("This will take a while... There is 50 seconds of busy work per run.")
         print("Consider adding --fast if you are in a rush.")
 
@@ -65,7 +65,6 @@ if __name__ == '__main__':
             cores = range(1, os.cpu_count() + 1)
             min_cores = [1, 2, 3, 4, 5, 10, 20, 40, 60, 72]
             for num in cores:
-                print(f'{num} cpus', end='', flush=True)
                 run_test([exe, '--cores', f'{num}',
                           '--hunger', f'{hunger}', '--num_tables', '1', '--num_philosophers', f'{philosophers}', '--optimal_order', '1'], num, csv_writer_vdo, vdo)
                 run_test([exe, '--cores', f'{num}',
@@ -74,11 +73,11 @@ if __name__ == '__main__':
                           '--hunger', f'{hunger}', '--num_tables', '1', '--num_philosophers', f'{philosophers}', '1'], num, csv_writer_pds, pds)
                 run_test(['taskset', '--cpu-list', f'0-{num-1}', exe, '--cores', f'{num}', '--pthread',
                           '--hunger', f'{hunger}', '--num_tables', '1', '--num_philosophers', f'{philosophers}', '1', '--optimal_order'], num, csv_writer_pdo, pdo)
+                print('.', end='', flush=True)
             for num in min_cores:
                 if num > os.cpu_count():
                     break
-                print(f'{num} cpus', end='', flush=True)
                 run_test([exe, '--cores', f'{num}', '--test_no', '1',
                           '--hunger', f'{hunger}', '--num_tables', '1', '--num_philosophers', f'{philosophers}', '1'], num, csv_writer_vds, vds)
                 print('.', end='', flush=True)
-            print('done repeat')
+            print()

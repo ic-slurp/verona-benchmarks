@@ -23,7 +23,15 @@ def getopts():
 def run_test(args, filename):
     with open(filename, 'w') as file:
         # set stdout to file
-        subprocess.run(args, check=True, stdout=file, stderr=subprocess.STDOUT)
+        try:
+            subprocess.run(args, check=True, stdout=file, stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as e:
+            print("Failed to run Benchmark. Output:")
+            with open(filename, 'r') as f:
+                print(f.read())
+            print("Error:")
+            print(e)
+            exit(1)
 
 def run_boc_actor(cores, output_directory, repeats):
     print(f"Running boc (actor) on {cores} core")
